@@ -16,7 +16,7 @@ function curryObject(propertyNames) {
       objToBeMerged[prop] = settings[prop]
     }
     const resObj = Object.assign(newObj, objToBeMerged)
-    if (presentKeys.length + addedKeys.length === propertyNames.length) {
+    if (presentKeys.length + addedKeys.length === toBeAddedSet.size) {
       return resObj
     }
     const resFunc = settings => partialApply(settings, resObj)
@@ -27,5 +27,4 @@ function curryObject(propertyNames) {
   }
   return settings => partialApply(settings, {})
 }
-
 module.exports = curryObject
