@@ -1,6 +1,6 @@
 {
-  "name": "curryobject",
-  "version": "1.0.1",
+  "name": "curry-configured",
+  "version": "1.0.0",
   "description": "Partial constructor of object with such properties",
   "main": "index.js",
   "scripts": {

@@ -1,8 +1,23 @@
 const OBJ_PROP = Symbol('OBJ_PROP')
 const NOT_SET_PROPS = Symbol('NOT_SET_PROPS')
-function curryObject(propertyNames) {
-  const toBeAddedSet = new Set([...propertyNames])
+
+function curryConfigured(configPropNames = [], configuredFunction = x => x, initialObject = {}) {
+  const toBeAddedSet = new Set([...configPropNames])
+  const getDefault = obj => {
+    const resFunc = settings => partialApply(settings, obj)
+    resFunc[OBJ_PROP] = obj
+    resFunc[NOT_SET_PROPS] = configPropNames
+      .filter(prop => !(prop in obj))
+    return resFunc
+  }
   const partialApply = (settings, obj) => {
+    if (!settings) {
+      const resFunc = settings => partialApply(settings, obj)
+      resFunc[OBJ_PROP] = obj
+      resFunc[NOT_SET_PROPS] = configPropNames
+        .filter(prop => !(prop in obj))
+      return resFunc
+    }
     const presentKeys = Object.keys(obj)
     const presentSet = new Set([...presentKeys])
     const addedKeys = Object.keys(settings)
@@ -15,16 +30,13 @@ function curryObject(propertyNames) {
       }
       objToBeMerged[prop] = settings[prop]
     }
-    const resObj = Object.assign(newObj, objToBeMerged)
-    if (presentKeys.length + addedKeys.length === toBeAddedSet.size) {
-      return resObj
+    const resConfig = Object.assign(newObj, objToBeMerged)
+    const isEndOfPartialApplication = [...toBeAddedSet].every(prop => (prop in resConfig))
+    if (isEndOfPartialApplication) {
+      return configuredFunction(resConfig)
     }
-    const resFunc = settings => partialApply(settings, resObj)
-    resFunc[OBJ_PROP] = resObj
-    resFunc[NOT_SET_PROPS] = propertyNames
-      .filter(prop => !presentSet.has(prop) && !addedKeys.includes(prop))
-    return resFunc
+    return getDefault(resConfig)
   }
-  return settings => partialApply(settings, {})
+  return getDefault(initialObject)
 }
-module.exports = curryObject
+module.exports = curryConfigured
